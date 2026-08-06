@@ -95,11 +95,13 @@ void loop() {
 | **Infrared** | NEC send and receive, plus raw timing capture and replay |
 | **I2C** | Bus scanner and register access for the J15 expansion port |
 
-**Audio is not included.** The speaker and microphone need ESP-IDF I2S drivers
-whose API shifts between IDF versions, and wrapping them would make this library
-fragile. All the pin definitions are here, and the
+**Audio is not part of the class API.** The speaker and microphone need ESP-IDF
+I2S drivers whose API shifts between IDF versions, and wrapping them would make
+this library fragile. The pin definitions are in `OpenMotePins.h`, and
+`07_AudioRecordPlayback` is a complete worked example — the driver calls sit in
+the sketch where you can see and adjust them. The
 [demo firmware](https://github.com/Gangwa-Labs/openmote-beta-kit/tree/main/demos)
-has working implementations to copy.
+has more involved implementations.
 
 ## Examples
 
@@ -113,6 +115,7 @@ has working implementations to copy.
 | `04_Motion` | IMU sampling, pitch and roll |
 | `05_InfraredRemote` | Capture an NEC code and replay it |
 | `06_BoardSelfTest` | Exercises every peripheral in turn |
+| `07_AudioRecordPlayback` | Hold A to record from the mic, press B to play it back |
 | `demos/IRLearn` | Full learning universal remote, codes stored in NVS |
 
 ## Links
