@@ -42,13 +42,26 @@ Partition Scheme: 16M Flash (3MB APP/9.9MB FATFS)
 The full table, and why each setting matters, is in
 [ARDUINO_IDE_SETUP.md](https://github.com/Gangwa-Labs/openmote-beta-kit/blob/main/docs/ARDUINO_IDE_SETUP.md).
 
-## If an upload hangs at "Connecting…"
+## If you're having trouble uploading code, or getting errors on flashing
 
-Put the board into download mode by hand: plug in USB-C, remove the battery
-cover, **hold the Power button** on the top of the controller, **tap the Reset
-button** on the back, then release Power after a second or two. The board sits
-in the ROM bootloader waiting for firmware — re-check the port, since it often
-enumerates as a different one, then upload.
+Put the board into download mode by hand:
+
+- Plug the USB-C cable in.
+- Remove the battery cover.
+- **Hold down the Power button** on the top of the controller.
+- **Tap the Reset button** on the back of the controller.
+- Let go of the Power button after a second or two.
+
+The board is now sitting in the ROM bootloader waiting for firmware. Re-check
+your port before uploading — it often enumerates as a different one in download
+mode.
+
+**The controller vibrates while it is in download mode.** This is expected, and
+there is nothing wrong with your board. Once the flash has finished, tap the
+Reset button on the back and the buzzing stops. It is a hardware quirk of Gen
+3.3 — the rumble motor's gate pin is pulled up by the chip in download mode,
+before any firmware is running, so nothing in software can prevent it. It is
+fixed in the next hardware revision.
 
 More detail in
 [FLASHING.md](https://github.com/Gangwa-Labs/openmote-beta-kit/blob/main/docs/FLASHING.md).
