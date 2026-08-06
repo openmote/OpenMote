@@ -23,6 +23,11 @@
  * Mappings are stored in NVS, so they survive a power cycle and a re-flash of
  * the same firmware.
  *
+ * Idle power: after 30 seconds with no button activity the board enters deep
+ * sleep. Press Home, 1, 2, +, - or D-pad Right to wake it. A, B, Up, Down and
+ * Left cannot wake it — they are not on RTC-capable GPIOs. Learned codes are in
+ * NVS, so nothing is lost. Note the USB serial port disappears while asleep.
+ *
  * Everything is echoed over USB CDC serial (115200) as a backup record — but
  * the firmware never depends on a serial monitor being attached. See the note
  * on logf() below.
@@ -56,6 +61,9 @@
 #include <Preferences.h>
 #include <stdarg.h>
 
+#include <esp_sleep.h>
+#include <driver/rtc_io.h>
+
 #include <OpenMote.h>
 #include <OpenMoteIR.h>
 
@@ -73,6 +81,7 @@ Preferences prefs;
 #define PULSE_STEP_MS     500     // "got a code, pick a button" pulse speed
 #define SEND_RUMBLE_MS    30      // tactile confirmation when transmitting
 #define IR_CARRIER_KHZ    38
+#define IDLE_SLEEP_MS     30000   // no input for this long -> deep sleep
 
 // ---------------------------------------------------------------------------
 // Stored mapping — one per button, persisted to NVS
@@ -400,6 +409,54 @@ static void loopWaitButton() {
 }
 
 // ---------------------------------------------------------------------------
+// Idle deep sleep
+//
+// Only GPIO0-21 are RTC GPIOs on the ESP32-S3, and only an RTC GPIO can wake
+// the chip from deep sleep. That rules out A (38), Left (40), B (42), Up (43)
+// and Down (44) — they simply cannot be wake sources on this board.
+//
+// POWER (GPIO0) is RTC-capable but is deliberately NOT in this list: it is the
+// BOOT strapping pin. Waking from deep sleep resets the chip, and holding GPIO0
+// low across a reset is exactly the gesture that enters download mode, so using
+// it as the wake button can drop you into the bootloader instead of the sketch.
+// ---------------------------------------------------------------------------
+static const gpio_num_t kWakePins[] = {
+    GPIO_NUM_17,   // Home
+    GPIO_NUM_18,   // Button 1
+    GPIO_NUM_8,    // Button 2
+    GPIO_NUM_4,    // Plus
+    GPIO_NUM_13,   // Minus
+    GPIO_NUM_2,    // D-pad Right
+};
+
+static uint32_t lastActivity = 0;
+
+static void enterDeepSleep() {
+    logf("\nidle for %u s — entering deep sleep\n", (unsigned)(IDLE_SLEEP_MS / 1000));
+    logf("press Home, 1, 2, +, - or D-pad Right to wake\n");
+    logf("(the USB serial port will disappear until it wakes)\n");
+    Serial.flush();
+
+    mote.allLEDsOff();
+    mote.rumbleOff();
+    ir.end();                    // release the receive interrupt and PWM channel
+
+    uint64_t mask = 0;
+    for (uint8_t i = 0; i < sizeof(kWakePins) / sizeof(kWakePins[0]); i++) {
+        // The INPUT_PULLUP set by mote.begin() is a digital pull-up and powers
+        // down with the rest of the digital domain. Without the RTC pull-up the
+        // pin floats in sleep, which gives phantom wakes or none at all.
+        rtc_gpio_pullup_en(kWakePins[i]);
+        rtc_gpio_pulldown_dis(kWakePins[i]);
+        mask |= 1ULL << (uint8_t)kWakePins[i];
+    }
+
+    // Buttons are active low, so wake when any of them is pulled down.
+    esp_sleep_enable_ext1_wakeup(mask, ESP_EXT1_WAKEUP_ANY_LOW);
+    esp_deep_sleep_start();      // does not return; the board reboots on wake
+}
+
+// ---------------------------------------------------------------------------
 
 void setup() {
     Serial.begin(115200);
@@ -416,18 +473,32 @@ void setup() {
     logf("Hold A + B for 2 s to capture a code, then press a button to bind it.\n");
     printTable();
 
+    if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT1) {
+        logf("(woke from deep sleep)\n");
+    }
+
     // Brief sweep so it is obvious the firmware is alive without a monitor.
     for (uint8_t i = 1; i <= 4; i++) { mote.setLED(i, true); delay(70); }
     mote.allLEDsOff();
+
+    lastActivity = millis();
 }
 
 void loop() {
     mote.update();
 
+    // Any button touched, or any learn step in progress, counts as activity.
+    if (mote.buttonMask() != 0 || state != ST_IDLE) lastActivity = millis();
+
     switch (state) {
         case ST_IDLE:        loopIdle();       break;
         case ST_WAIT_IR:     loopWaitIR();     break;
         case ST_WAIT_BUTTON: loopWaitButton(); break;
+    }
+
+    // Only sleep from idle — never mid-learn, where a capture would be lost.
+    if (state == ST_IDLE && millis() - lastActivity >= IDLE_SLEEP_MS) {
+        enterDeepSleep();
     }
 
     delay(2);
