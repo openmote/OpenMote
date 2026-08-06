@@ -29,8 +29,9 @@
  * NVS, so nothing is lost. Note the USB serial port disappears while asleep.
  *
  * Everything is echoed over USB CDC serial (115200) as a backup record — but
- * the firmware never depends on a serial monitor being attached. See the note
- * on logf() below.
+ * the firmware never depends on a serial monitor being attached, and runs
+ * identically with nothing plugged in. See the note on logf() below for why it
+ * does not gate on `if (Serial)`.
  *
  * NEC codes are stored as 32 bits. Anything the NEC decoder does not recognise
  * is stored as raw mark/space timing instead and replayed on a 38 kHz carrier,
@@ -109,13 +110,19 @@ static uint16_t suppressRelease = 0;   // buttons whose next release is ignored
 // ---------------------------------------------------------------------------
 // Logging
 //
-// The board has to work with nothing plugged into it, so every message is
-// gated on the USB CDC port actually being open. Without this guard, writes to
-// an unread port stall once the driver's buffer fills, which would drag out the
-// main loop and make button handling feel sticky.
+// Deliberately NOT gated on `if (Serial)`. That idiom looks right but breaks on
+// this board: with USB Mode = Hardware CDC and JTAG, `Serial` is an HWCDC, and
+// HWCDC::isCDC_Connected() returns false on its first call by design — it only
+// arms the IN_EMPTY interrupt and flushes the FIFO, reporting true on a later
+// call once the host has drained data. Gating on it therefore suppresses the
+// very writes that would make it true, and you get silence forever.
+//
+// The guard is also unnecessary. HWCDC::write() already checks the connection
+// itself and, when nothing is listening, discards through a ring-buffer FIFO
+// policy rather than blocking — and every path is bounded by a 100 ms tx
+// timeout. So writing with no monitor attached is safe and cheap.
 // ---------------------------------------------------------------------------
 static void logf(const char *fmt, ...) {
-    if (!Serial) return;
     char buf[192];
     va_list ap;
     va_start(ap, fmt);
@@ -460,7 +467,13 @@ static void enterDeepSleep() {
 
 void setup() {
     Serial.begin(115200);
-    delay(600);                          // give USB CDC a moment, if attached
+
+    // Wait for a monitor to attach, but give up so a board running standalone
+    // is never held up. Native USB usually needs 1-2 s to enumerate and reopen
+    // the port after a reset, which is why the banner used to go missing.
+    uint32_t t0 = millis();
+    while (!Serial && millis() - t0 < 2000) delay(10);
+    delay(200);                          // let the host finish opening the port
 
     // No IMU needed here, so skip sensor bring-up and leave the I2C bus alone.
     mote.begin(false);
