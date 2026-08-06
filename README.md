@@ -42,6 +42,17 @@ Partition Scheme: 16M Flash (3MB APP/9.9MB FATFS)
 The full table, and why each setting matters, is in
 [ARDUINO_IDE_SETUP.md](https://github.com/Gangwa-Labs/openmote-beta-kit/blob/main/docs/ARDUINO_IDE_SETUP.md).
 
+## If an upload hangs at "Connecting…"
+
+Put the board into download mode by hand: plug in USB-C, remove the battery
+cover, **hold the Power button** on the top of the controller, **tap the Reset
+button** on the back, then release Power after a second or two. The board sits
+in the ROM bootloader waiting for firmware — re-check the port, since it often
+enumerates as a different one, then upload.
+
+More detail in
+[FLASHING.md](https://github.com/Gangwa-Labs/openmote-beta-kit/blob/main/docs/FLASHING.md).
+
 ## Hello world
 
 ```cpp
