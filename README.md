@@ -117,6 +117,7 @@ has more involved implementations.
 | `06_BoardSelfTest` | Exercises every peripheral in turn |
 | `07_AudioRecordPlayback` | Hold A to record from the mic, press B to play it back |
 | `demos/IRLearn` | Full learning universal remote, codes stored in NVS |
+| `demos/AirMouse` | Absolute-pointing USB mouse (set **USB Mode: USB-OTG (TinyUSB)**) |
 
 ## Links
 
