@@ -168,6 +168,17 @@ static void record() {
 // ---------------------------------------------------------------------------
 // Play
 // ---------------------------------------------------------------------------
+
+// A *new* press on any button, as opposed to one that is merely still held.
+// Playback starts from B's press edge, so B is still down when the loop below
+// begins — checking buttonDown() here would stop playback instantly.
+static bool anyButtonPressedEdge() {
+    for (uint8_t i = 0; i < BTN_COUNT; i++) {
+        if (mote.buttonPressed((OpenMoteButton)i)) return true;
+    }
+    return false;
+}
+
 static void play() {
     if (recLen == 0) {
         Serial.println("nothing recorded yet — hold A first");
@@ -193,13 +204,23 @@ static void play() {
         size_t written = 0;
         i2s_channel_write(txChan, chunk, n * sizeof(int16_t), &written,
                           200 / portTICK_PERIOD_MS);
-        pos += n;
+
+        if (written == 0) {          // timed out with nothing consumed
+            Serial.println("i2s write stalled — stopping");
+            break;
+        }
+
+        // Advance by what the driver actually took. On a short write the tail
+        // of this chunk is simply re-converted on the next pass, rather than
+        // being skipped.
+        pos += written / sizeof(int16_t);
 
         mote.setLEDs((uint8_t)(1 << ((pos / CHUNK_SAMPLES) % 4)));
 
-        // Let go early if anything is pressed.
+        // Stop early on a new button press. Not buttonDown(): B is still held
+        // from the press that started playback.
         mote.update();
-        if (mote.anyButtonDown()) {
+        if (anyButtonPressedEdge()) {
             Serial.println("playback stopped");
             break;
         }
