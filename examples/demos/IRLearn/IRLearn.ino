@@ -23,7 +23,7 @@
  * Mappings are stored in NVS, so they survive a power cycle and a re-flash of
  * the same firmware.
  *
- * Idle power: after 30 seconds with no button activity the board enters deep
+ * Idle power: after 10 minutes with no button activity the board enters deep
  * sleep. Press Home, 1, 2, +, - or D-pad Right to wake it. A, B, Up, Down and
  * Left cannot wake it — they are not on RTC-capable GPIOs. Learned codes are in
  * NVS, so nothing is lost. Note the USB serial port disappears while asleep.
@@ -81,7 +81,7 @@ Preferences prefs;
 #define PULSE_STEP_MS     500     // "got a code, pick a button" pulse speed
 #define SEND_RUMBLE_MS    30      // tactile confirmation when transmitting
 #define IR_CARRIER_KHZ    38
-#define IDLE_SLEEP_MS     30000   // no input for this long -> deep sleep
+#define IDLE_SLEEP_MS     600000  // no input for this long (10 min) -> deep sleep
 
 // ---------------------------------------------------------------------------
 // Stored mapping — one per button, persisted to NVS
@@ -432,7 +432,7 @@ static const gpio_num_t kWakePins[] = {
 static uint32_t lastActivity = 0;
 
 static void enterDeepSleep() {
-    logf("\nidle for %u s — entering deep sleep\n", (unsigned)(IDLE_SLEEP_MS / 1000));
+    logf("\nidle for %u min — entering deep sleep\n", (unsigned)(IDLE_SLEEP_MS / 60000));
     logf("press Home, 1, 2, +, - or D-pad Right to wake\n");
     logf("(the USB serial port will disappear until it wakes)\n");
     Serial.flush();
