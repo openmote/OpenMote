@@ -118,6 +118,7 @@ has more involved implementations.
 | `07_AudioRecordPlayback` | Hold A to record from the mic, press B to play it back |
 | `demos/IRLearn` | Full learning universal remote, codes stored in NVS |
 | `demos/AirMouse` | Absolute-pointing USB mouse (set **USB Mode: USB-OTG (TinyUSB)**) |
+| `demos/TVRemote` | BLE keyboard remote for a Fire TV, plus IR TV power |
 
 ## Links
 
