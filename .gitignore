@@ -1,0 +1,14 @@
+# Build output
+.pio/
+build/
+*.o
+*.a
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Arduino Library Manager submission must not see these
+*.exe
+.development

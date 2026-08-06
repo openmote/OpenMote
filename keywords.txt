@@ -1,0 +1,97 @@
+#######################################
+# Syntax colouring for the OpenMote library (Arduino IDE)
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+OpenMote	KEYWORD1
+OpenMoteIR	KEYWORD1
+IMUData	KEYWORD1
+OpenMoteButton	KEYWORD1
+OpenMoteAccelRange	KEYWORD1
+OpenMoteGyroRange	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin	KEYWORD2
+update	KEYWORD2
+buttonPressed	KEYWORD2
+buttonReleased	KEYWORD2
+buttonDown	KEYWORD2
+buttonHeldFor	KEYWORD2
+buttonHoldTime	KEYWORD2
+anyButtonDown	KEYWORD2
+buttonMask	KEYWORD2
+buttonName	KEYWORD2
+buttonPin	KEYWORD2
+setDebounceTime	KEYWORD2
+setLED	KEYWORD2
+toggleLED	KEYWORD2
+getLED	KEYWORD2
+setLEDs	KEYWORD2
+ledBar	KEYWORD2
+allLEDsOff	KEYWORD2
+rumble	KEYWORD2
+rumbleOn	KEYWORD2
+rumbleOff	KEYWORD2
+isRumbling	KEYWORD2
+batteryVolts	KEYWORD2
+batteryPercent	KEYWORD2
+batteryValid	KEYWORD2
+setBatteryCalibration	KEYWORD2
+imuAvailable	KEYWORD2
+readIMU	KEYWORD2
+readTemperature	KEYWORD2
+pitch	KEYWORD2
+roll	KEYWORD2
+setAccelRange	KEYWORD2
+setGyroRange	KEYWORD2
+i2cWrite	KEYWORD2
+i2cRead	KEYWORD2
+i2cDetect	KEYWORD2
+i2cScan	KEYWORD2
+available	KEYWORD2
+resume	KEYWORD2
+isNEC	KEYWORD2
+address	KEYWORD2
+command	KEYWORD2
+code	KEYWORD2
+isRepeat	KEYWORD2
+rawLength	KEYWORD2
+rawBuffer	KEYWORD2
+printRaw	KEYWORD2
+sendNEC	KEYWORD2
+sendNECRaw	KEYWORD2
+sendNECRepeat	KEYWORD2
+sendRaw	KEYWORD2
+setDutyCycle	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BTN_UP	LITERAL1
+BTN_DOWN	LITERAL1
+BTN_LEFT	LITERAL1
+BTN_RIGHT	LITERAL1
+BTN_A	LITERAL1
+BTN_B	LITERAL1
+BTN_1	LITERAL1
+BTN_2	LITERAL1
+BTN_PLUS	LITERAL1
+BTN_MINUS	LITERAL1
+BTN_HOME	LITERAL1
+BTN_POWER	LITERAL1
+BTN_COUNT	LITERAL1
+ACCEL_2G	LITERAL1
+ACCEL_4G	LITERAL1
+ACCEL_8G	LITERAL1
+ACCEL_16G	LITERAL1
+GYRO_245DPS	LITERAL1
+GYRO_500DPS	LITERAL1
+GYRO_1000DPS	LITERAL1
+GYRO_2000DPS	LITERAL1
