@@ -12,3 +12,8 @@ Thumbs.db
 # Arduino Library Manager submission must not see these
 *.exe
 .development
+
+# Arduino IDE writes this next to a sketch when you pick a board/port.
+# The library is used via a junction during development, so these would
+# otherwise land in the repo carrying a local COM port number.
+sketch.json
