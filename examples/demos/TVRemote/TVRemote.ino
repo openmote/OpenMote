@@ -14,6 +14,12 @@
  *
  * LED 2 slow-blinks while BLE is disconnected.
  *
+ * Switching between Bluetooth demos
+ *   This sketch and demos/AirMouseBLE use the same Bluetooth address on a given
+ *   remote. If a TV or computer was paired with one of them, remove the remote
+ *   from that device's Bluetooth list before pairing the other - otherwise it
+ *   tries to reuse the old pairing and the connection fails or drops.
+ *
  * ---------------------------------------------------------------------------
  * No extra libraries needed
  *
